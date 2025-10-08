@@ -46,7 +46,7 @@
     "WORK_TYPE": {
       "description": "Set bot mode: 'public' to allow everyone to use, 'private' to allow only owner/sudo users.",
       "required": false,
-      "value": "private"
+      "value": "public"
     },
     "AUTO_STATUS_VIEW": {
       "description": "Set to 'true' to auto-view WhatsApp statuses, or 'false' to disable.",
