@@ -37,29 +37,42 @@ Sparky({
 
 
 Sparky({
-	name: "tagall",
-	fromMe: true,
-	desc: lang.TAGALL_DESC,
-	category: "group",
-}, async ({
-	client,
-	m
-}) => {
-	if (!m.isGroup) return await m.reply(lang.NOT_GROUP);
-	
-	//if (!m.botIsAdmin) return await m.reply(lang.NOT_ADMIN);
-		const {
-			participants
-		} = await client.groupMetadata(m.jid).catch(() => ({
-			participants: []
-		}));
-		if (!participants.length) return await m.reply(lang.ERROR_METADATA);
-		const msg = participants.map((p, i) => `${i + 1}. @${p.id.split('@')[0]}`).join("\n");
-		const jids = participants.map(p => p.id);
-		return await m.sendMsg(m.jid, msg, {
-			mentions: jids,
-			quoted: m
-		});
+    name: "tagall",
+    fromMe: true,
+    desc: lang.TAGALL_DESC,
+    category: "group",
+}, async ({ client, m }) => {
+    if (!m.isGroup) return await m.reply(lang.NOT_GROUP);
+
+    const groupMeta = await client.groupMetadata(m.jid).catch(() => null);
+    if (!groupMeta) return await m.reply(lang.ERROR_METADATA);
+
+    const { subject, participants } = groupMeta;
+
+    if (!participants.length) return await m.reply(lang.ERROR_METADATA);
+
+    // Separate admins and normal members
+    const admins = participants.filter(p => p.admin);
+    const members = participants.filter(p => !p.admin);
+
+    const msg = `
+▢ *Group Name:* ${subject}
+▢ *Total Members:* ${participants.length}
+▢ *Admins:* ${admins.length}
+────────────────────────
+👑 *Admins:*
+${admins.map((a, i) => `${i + 1}. @${a.id.split('@')[0]}`).join("\n")}
+
+👥 *Members:*
+${members.map((m, i) => `${i + 1}. @${m.id.split('@')[0]}`).join("\n")}
+`.trim();
+
+    const jids = participants.map(p => p.id);
+
+    return await m.sendMsg(m.jid, msg, {
+        mentions: jids,
+        quoted: m
+    });
 });
 
 
